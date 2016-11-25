@@ -1,8 +1,5 @@
 package controller;
 
-import java.util.ArrayList;
-
-import model.CompatibilidadeHardware;
 import model.Produto;
 import model.ProdutoRules;
 
@@ -12,13 +9,17 @@ public class Controlador {
 	public Controlador() {
 		this.produtoRules = new ProdutoRules();
 	}
-
-	public String cadastrarProduto(String nome, String descricao, int quantidade, double preco,
-			ArrayList<CompatibilidadeHardware> compHardware, ArrayList<String>compSoftware){
-		Produto p = new Produto(preco, quantidade, nome, descricao);
-		p.setCompatibilidadeHardware(compHardware);
-		p.setCompatibilidadeSoftware(compSoftware);
-		String erro = produtoRules.cadastrarProduto(p);
-		return erro;
+	
+	public String cadastrarProduto(int codigo, double preco, int quantidade, String compativelWindows, String compativelLinux,
+			String compativelMac, String outros, String nome, String descricao, String compativelSocket,
+			String compativelSlot, String categoria){
+		Produto p = new Produto( codigo,  preco,  quantidade,  compativelWindows,  compativelLinux,
+				 compativelMac,  outros,  nome,  descricao,  compativelSocket,
+				 compativelSlot,  categoria);
+		if(produtoRules.validarCadastro(p).equals("")){
+			return produtoRules.cadastrarProduto(p);
+		} else {
+			return null;
+		}
 	}
 }

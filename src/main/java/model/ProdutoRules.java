@@ -7,62 +7,60 @@ import dao.ProdutoDAO;
 
 public class ProdutoRules {
 	ProdutoDAO produtoDao;
-	
+
 	public ProdutoRules() {
 		this.produtoDao = new ProdutoDAO();
 	}
 
 	public String validarCadastro(Produto produto) {
-		if (produto.codigo <= 0) {
-			return "Código não informado.";
+		if (produto.getNome() == null || produto.getNome().equals("")) {
+			return "O nome do produto é um camo obrigatório.";
 		}
-		if (produto.nome == null || produto.nome.equals("")) {
-			return "Produto não pode ficar vazio.";
+		if (produto.getDescricao() == null || produto.getDescricao().equals("")) {
+			return "A descrição do produto é obrigatoria.";
 		}
-		if (produto.preco <= 0) {
-			return "Valor Obrigatório";
+		if (produto.getPreco() <= 0) {
+			return "Informe o valor do produto.";
 		}
-		if (produto.quantidade <= 0) {
-			return "Informe a quantidade.";
+		if (produto.getQuantidade() <= 0) {
+			return "Informe a quantidade de itens.";
 		}
-		if (produto.compatibilidadeSoftware == null || produto.compatibilidadeSoftware.size() <= 0) {
-			return "Informe ao menos uma compatibilidade de Software.";
+		if (produto.getCompativelLinux().equals("") && produto.getCompativelWindows().equals("")
+				&& produto.getCompativelMac().equals("")) {
+			return "Seleciona ao menos uma compatibilidade de Software.";
 		}
-		if (validarCompatibilidadeHardware(produto)) {
-			return "Informe ao menos uma compatibilidade de HardWare.";
+		if(produto.getCompativelSlot().equals("") && produto.getCompativelSocket().equals("")){
+			return "Selecione tipo de Slot e modelo de Socket.";
 		}
-		return null;
+		if(produto.getCategoria().equals("")){
+			return "Selecione a categoria.";
+		}
+		return "";
 	}
 
 	public boolean validarCompatibilidadeHardware(Produto produto) {
-		boolean valido = true;
-		if (produto.compatibilidadeHardware.slot == null || produto.compatibilidadeHardware.slot.equals("")) {
-			valido = false;
-		} else if (produto.compatibilidadeHardware.modelo == null
-				|| produto.compatibilidadeHardware.modelo.equals("")) {
-			valido = false;
-		} else if (produto.compatibilidadeHardware.encapsulamento == null
-				|| produto.compatibilidadeHardware.encapsulamento.equals("")) {
-			valido = false;
-		}
-		return valido;
+		return false;
 	}
-	
-	public String cadastrarProduto(Produto p){
+
+	public String cadastrarProduto(Produto p) {
 		String erro = validarCadastro(p);
-		if(validarCadastro(p).equals("")){
+		try{
+		if (validarCadastro(p).equals("")) {
 			erro = produtoDao.cadastrarProduto(p);
-			if(!erro.equals("")){
+			if (!erro.equals("")) {
 				return "Erro ao realizar cadastro: " + erro;
 			} else {
 				return "Cadastro realizado com sucesso.";
 			}
 		} else {
 			return erro;
+		} 
+		} catch (Exception e) {
+			return "Falha ao cadastrar, "+ e.getMessage();
 		}
 	}
-	
-	public ArrayList<Produto> buscarTodos(){
+
+	public ArrayList<Produto> buscarTodos() {
 		try {
 			return produtoDao.buscarTodos();
 		} catch (SQLException e) {
