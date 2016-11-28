@@ -22,4 +22,14 @@ public class Controlador {
 			return null;
 		}
 	}
+	
+	public Produto buscarProduto(int codigo, String nome){
+		codigo = codigo < 0 ? 0 : codigo;
+		nome = nome == null ? "" : nome;
+		return produtoRules.buscarProduto(codigo, nome);
+	}
+
+	public boolean excluirProduto(int codigo) {
+		return produtoRules.excluirProduto(codigo);
+	}
 }

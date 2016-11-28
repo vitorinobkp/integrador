@@ -67,4 +67,16 @@ public class ProdutoRules {
 			return null;
 		}
 	}
+	
+	public Produto buscarProduto(int codigo, String nome){
+		try{
+			return produtoDao.buscarProduto(codigo, nome);
+		}catch(SQLException e){
+			return null;
+		}
+	}
+
+	public boolean excluirProduto(int codigo) {
+		return produtoDao.excluirProduto(codigo) == "";
+	}
 }

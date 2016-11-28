@@ -137,4 +137,32 @@ public class ProdutoDAO {
 		}
 		return p;
 	}
+	
+	public Produto buscarProduto(int codigo, String nomeProduto) throws SQLException {
+		String sql = "SELECT * FROM PRODUTOS WHERE 1=1 ";
+		if(codigo > 0){
+			sql+= " AND id = " + codigo;
+		}
+		if(!nomeProduto.equals("")){
+			sql+= " AND nome like '%" + nomeProduto + "%'";
+		}
+		ResultSet rs = conexao.executeConsulta(sql);
+		Produto p = null;
+		while (rs.next()) {
+			p = new Produto();
+			p.setCodigo(rs.getInt(1));
+			p.setNome(rs.getString(2));
+			p.setDescricao(rs.getString(3));
+			p.setQuantidade(rs.getInt(4));
+			p.setPreco(rs.getDouble(5));
+			p.setCompativelWindows(rs.getString(6));
+			p.setCompativelLinux(rs.getString(7));
+			p.setOutros(rs.getString(8));
+			p.setCompativelSocket(rs.getString(9));
+			p.setCompativelMac(rs.getString(10));
+			p.setCompativelSlot(rs.getString(11));
+			p.setCategoria(rs.getString(12));
+		}
+		return p;
+	}
 }

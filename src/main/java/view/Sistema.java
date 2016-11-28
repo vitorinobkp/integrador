@@ -21,6 +21,11 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import controller.Controlador;
+import model.Produto;
+
+import java.awt.Toolkit;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class Sistema {
 
@@ -35,6 +40,15 @@ public class Sistema {
 	private JTable tabelaVendas;
 	private JTextField txtCadastroDescricao;
 	private JTextField txtPreco;
+	private JPanel pnlCopatSoft;
+	private JCheckBox chkLinux;
+	private JCheckBox chkWindows;
+	private JCheckBox chkMacOS;
+	private JComboBox cbModelo;
+	private JComboBox cbSlot;
+	private JComboBox cbCategoria;
+	private JButton btnExcluir;
+	private JButton btnSalvar;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -52,9 +66,57 @@ public class Sistema {
 	public Sistema() {
 		initialize();
 	}
+	
+	private void exluirProduto(int codigo){
+		Controlador ctrl = new Controlador();
+		if(codigo > 0){
+			if(ctrl.excluirProduto(codigo)){
+				JOptionPane.showMessageDialog(null, "Produto excluído com sucesso");
+			}else{
+				JOptionPane.showMessageDialog(null, "Falha ao excluir produto.");
+			}
+		}
+	}
+	private void buscarProduto(int codigo, String text) {
+		Controlador ctrl = new Controlador();
+		Produto p = ctrl.buscarProduto(codigo, text);
+		if (p != null) {
+			txtCodigo.setText(String.valueOf(p.getCodigo()));
+			txtCadastroDescricao.setText(p.getDescricao());
+			txtPreco.setText("R$" + String.valueOf(p.getPreco()));
+			txtProduto.setText(p.getNome());
+			txtQuantidade.setText(String.valueOf(p.getQuantidade()));
+			chkLinux.setSelected(p.getCompativelLinux().equals("S"));
+			chkMacOS.setSelected(p.getCompativelMac().equals("S"));
+			chkWindows.setSelected(p.getCompativelWindows().equals("S"));
+			cbCategoria.setSelectedItem(p.getCategoria());
+			cbModelo.setSelectedItem(p.getCompativelSocket());
+			cbSlot.setSelectedItem(p.getCompativelSlot());
+			btnExcluir.setEnabled(true);
+		}else{
+			btnExcluir.setEnabled(false);
+			limparTela();
+		}
+
+	}
+	
+	private void limparTela(){
+		txtCadastroDescricao.setText("");
+		txtPreco.setText("R$");
+		txtProduto.setText("");
+		txtQuantidade.setText("");
+		chkLinux.setSelected(false);
+		chkMacOS.setSelected(false);
+		chkWindows.setSelected(false);
+		cbCategoria.setSelectedIndex(0);
+		cbModelo.setSelectedIndex(0);
+		cbSlot.setSelectedIndex(0);
+		btnExcluir.setEnabled(false);
+	}
 
 	private void initialize() {
 		frmPiEstoque = new JFrame();
+		frmPiEstoque.setIconImage(Toolkit.getDefaultToolkit().getImage("C:\\Users\\User\\Downloads\\Guj-logo-1.png"));
 		frmPiEstoque.setTitle("PI - Estoque");
 		frmPiEstoque.setBounds(100, 100, 591, 502);
 		frmPiEstoque.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -79,6 +141,21 @@ public class Sistema {
 		pnlCadastro.add(lblCdigo);
 
 		txtCodigo = new JTextField();
+		txtCodigo.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+
+				int codigo = -1;
+				try {
+					if(!txtCodigo.getText().equals(""))
+						codigo = Integer.parseInt(txtCodigo.getText());
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Código informado inválido.");
+					return;
+				}
+				buscarProduto(codigo, null);
+			}
+		});
 		txtCodigo.setBounds(95, 8, 134, 20);
 		pnlCadastro.add(txtCodigo);
 		txtCodigo.setColumns(10);
@@ -95,49 +172,49 @@ public class Sistema {
 		lblQuantidade.setBounds(10, 86, 70, 14);
 		pnlCadastro.add(lblQuantidade);
 
-		JPanel pnlCopatSoft = new JPanel();
+		pnlCopatSoft = new JPanel();
 		pnlCopatSoft.setBorder(new TitledBorder(null, "Compatibilidade de Software", TitledBorder.LEADING,
 				TitledBorder.TOP, null, null));
 		pnlCopatSoft.setBounds(369, 11, 168, 100);
 		pnlCadastro.add(pnlCopatSoft);
 		pnlCopatSoft.setLayout(null);
 
-		final JCheckBox chkLinux = new JCheckBox("GNU/Linux");
+		chkLinux = new JCheckBox("GNU/Linux");
 		chkLinux.setBounds(6, 21, 97, 23);
 		pnlCopatSoft.add(chkLinux);
 
-		final JCheckBox chkWindows = new JCheckBox("Windows");
+		chkWindows = new JCheckBox("Windows");
 		chkWindows.setBounds(6, 47, 97, 23);
 		pnlCopatSoft.add(chkWindows);
 
-		final JCheckBox chkMacOS = new JCheckBox("MacOS");
+		chkMacOS = new JCheckBox("MacOS");
 		chkMacOS.setBounds(6, 73, 97, 23);
 		pnlCopatSoft.add(chkMacOS);
 
 		JPanel CompatHard = new JPanel();
 		CompatHard.setBorder(new TitledBorder(null, "Compatibilidade de Hardware", TitledBorder.LEADING,
 				TitledBorder.TOP, null, null));
-		CompatHard.setBounds(369, 141, 168, 118);
+		CompatHard.setBounds(369, 122, 168, 113);
 		pnlCadastro.add(CompatHard);
 		CompatHard.setLayout(null);
 
-		final JComboBox cbModelo = new JComboBox();
+		cbModelo = new JComboBox();
 		cbModelo.setEditable(true);
 		cbModelo.setModel(new DefaultComboBoxModel(
 				new String[] { "Selec. o modelo socket", "Socket 1156", "Socket 1155", "Socket 1150", "Socket 775" }));
 		cbModelo.setBounds(10, 22, 148, 20);
 		CompatHard.add(cbModelo);
 
-		final JComboBox cbSlot = new JComboBox();
+		cbSlot = new JComboBox();
 		cbSlot.setEditable(true);
 		cbSlot.setModel(new DefaultComboBoxModel(new String[] { "Selec. modelo de slot", "DDR2", "DDR3", "DDR4" }));
 		cbSlot.setBounds(10, 53, 148, 20);
 		CompatHard.add(cbSlot);
 
-		final JComboBox cbCategoria = new JComboBox();
+		cbCategoria = new JComboBox();
 		cbCategoria.setEditable(true);
-		cbCategoria.setModel(
-				new DefaultComboBoxModel(new String[] {"Selec. a categoria", "Processador", "Memoria DRAM", "Placa M\u00E3e", "Outros"}));
+		cbCategoria.setModel(new DefaultComboBoxModel(
+				new String[] { "Selec. a categoria", "Processador", "Memoria DRAM", "Placa M\u00E3e", "Outros" }));
 		cbCategoria.setBounds(10, 84, 148, 20);
 		CompatHard.add(cbCategoria);
 
@@ -155,32 +232,38 @@ public class Sistema {
 		pnlCadastro.add(txtQuantidade);
 		txtQuantidade.setColumns(10);
 
-		JButton btnSalvar = new JButton("Salvar");
+		btnSalvar = new JButton("Salvar");
 		btnSalvar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Controlador ctrl = new Controlador();
-				String compatWindows = chkWindows.isSelected()?"S":"N";
-				String compatLinux = chkLinux.isSelected()?"S":"N";
-				String compatMac = chkMacOS.isSelected()?"S":"N";
-				String outros = chkMacOS.isSelected()?"S":"N";
-				String erro = ctrl.cadastrarProduto(Integer.valueOf(0), Double.parseDouble(txtPreco.getText()), Integer.valueOf(txtQuantidade.getText()),
-						compatWindows, compatLinux, compatMac, outros, String.valueOf(txtProduto.getText()), String.valueOf(txtCadastroDescricao.getText()),
-						 cbModelo.getSelectedItem().toString(), cbSlot.getSelectedItem().toString(), cbCategoria.getSelectedItem().toString());
+				String compatWindows = chkWindows.isSelected() ? "S" : "N";
+				String compatLinux = chkLinux.isSelected() ? "S" : "N";
+				String compatMac = chkMacOS.isSelected() ? "S" : "N";
+				String outros = chkMacOS.isSelected() ? "S" : "N";
+				String erro = ctrl.cadastrarProduto(Integer.valueOf(0), Double.parseDouble(txtPreco.getText()),
+						Integer.valueOf(txtQuantidade.getText()), compatWindows, compatLinux, compatMac, outros,
+						String.valueOf(txtProduto.getText()), String.valueOf(txtCadastroDescricao.getText()),
+						cbModelo.getSelectedItem().toString(), cbSlot.getSelectedItem().toString(),
+						cbCategoria.getSelectedItem().toString());
 				JOptionPane.showMessageDialog(null, erro);
 			}
 		});
 		btnSalvar.setBounds(95, 283, 89, 23);
 		pnlCadastro.add(btnSalvar);
 
-		JButton btnExcluir = new JButton("Excluir");
+		btnExcluir = new JButton("Excluir");
+		btnExcluir.setEnabled(false);
 		btnExcluir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				txtCodigo.setText("");
-				txtProduto.setText("");
-				// txtPreo.setText("");
-				txtQuantidade.setText("");
-				// txtDescricao.setText("");
-
+				int codigo = Integer.parseInt(txtCodigo.getText());;
+				try{
+					if(codigo > 0)
+						codigo = Integer.parseInt(txtCodigo.getText());
+				}catch (Exception er) {
+					JOptionPane.showMessageDialog(null, "Código digitado inválido");
+					return;
+				}
+				exluirProduto(codigo);
 			}
 
 		});
@@ -188,22 +271,27 @@ public class Sistema {
 		pnlCadastro.add(btnExcluir);
 
 		JButton btnCadastroPesquisarCod = new JButton("Pesquisar");
+		btnCadastroPesquisarCod.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int codigo = -1;
+				try {
+					if(!txtCodigo.getText().equals(""))
+						codigo = Integer.parseInt(txtCodigo.getText());
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Código informado inválido.");
+					return;
+				}
+				buscarProduto(codigo, txtProduto.getText());
+			}
+		});
 		btnCadastroPesquisarCod.setBounds(251, 7, 108, 23);
 		pnlCadastro.add(btnCadastroPesquisarCod);
-
-		JButton btnCadastroPesquisarProd = new JButton("Pesquisar");
-		btnCadastroPesquisarProd.setBounds(251, 32, 108, 23);
-		pnlCadastro.add(btnCadastroPesquisarProd);
-
-		JButton btnEditar = new JButton("Editar");
-		btnEditar.setBounds(183, 283, 89, 23);
-		pnlCadastro.add(btnEditar);
 
 		txtCadastroDescricao = new JTextField();
 		txtCadastroDescricao.setBounds(95, 108, 264, 164);
 		pnlCadastro.add(txtCadastroDescricao);
 		txtCadastroDescricao.setColumns(10);
-		
+
 		txtPreco = new JTextField();
 		txtPreco.setBounds(95, 58, 134, 20);
 		pnlCadastro.add(txtPreco);
@@ -242,9 +330,9 @@ public class Sistema {
 		pnlProduto.add(btnVendasPesquisar);
 
 		tabelaVendas = new JTable();
-		tabelaVendas.setModel(new DefaultTableModel(new Object[][] {
-
-		}, new String[] { "C\u00F3digo", "Produto", "Descri\u00E7\u00E3o" }));
+		tabelaVendas.setModel(
+				new DefaultTableModel(new Object[][] {}, new String[] { "New column", "New column", "New column",
+						"New column", "New column", "New column", "C\u00F3digo", "Produto", "Descri\u00E7\u00E3o" }));
 		tabelaVendas.setBounds(10, 54, 499, 88);
 		pnlProduto.add(tabelaVendas);
 
