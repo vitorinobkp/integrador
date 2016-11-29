@@ -1,5 +1,7 @@
 package controller;
 
+import java.util.ArrayList;
+
 import model.Produto;
 import model.ProdutoRules;
 
@@ -17,10 +19,22 @@ public class Controlador {
 				 compativelMac,  outros,  nome,  descricao,  compativelSocket,
 				 compativelSlot,  categoria);
 		if(produtoRules.validarCadastro(p).equals("")){
-			return produtoRules.cadastrarProduto(p);
+			if(buscarProduto(p.getCodigo(), null) == null){
+				return produtoRules.cadastrarProduto(p);
+			}else{
+				return produtoRules.atualizarProduto(p);
+			}
 		} else {
 			return null;
 		}
+	}
+	
+	public ArrayList<Produto> buscarProdutosPorNome(String nome){
+		return produtoRules.buscarProdutosPorNome(nome);
+	}
+	
+	public ArrayList<Produto> buscarTodosOsProdutos(){
+		return produtoRules.buscarTodos();
 	}
 	
 	public Produto buscarProduto(int codigo, String nome){

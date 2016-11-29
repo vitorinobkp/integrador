@@ -2,8 +2,12 @@ package view;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.util.ArrayList;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -18,14 +22,14 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import controller.Controlador;
 import model.Produto;
-
-import java.awt.Toolkit;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import model.TableModelProduto;
 
 public class Sistema {
 
@@ -72,6 +76,7 @@ public class Sistema {
 		if(codigo > 0){
 			if(ctrl.excluirProduto(codigo)){
 				JOptionPane.showMessageDialog(null, "Produto excluído com sucesso");
+				limparTela();
 			}else{
 				JOptionPane.showMessageDialog(null, "Falha ao excluir produto.");
 			}
@@ -83,7 +88,7 @@ public class Sistema {
 		if (p != null) {
 			txtCodigo.setText(String.valueOf(p.getCodigo()));
 			txtCadastroDescricao.setText(p.getDescricao());
-			txtPreco.setText("R$" + String.valueOf(p.getPreco()));
+			txtPreco.setText(String.valueOf(p.getPreco()));
 			txtProduto.setText(p.getNome());
 			txtQuantidade.setText(String.valueOf(p.getQuantidade()));
 			chkLinux.setSelected(p.getCompativelLinux().equals("S"));
@@ -102,7 +107,7 @@ public class Sistema {
 	
 	private void limparTela(){
 		txtCadastroDescricao.setText("");
-		txtPreco.setText("R$");
+		txtPreco.setText("");
 		txtProduto.setText("");
 		txtQuantidade.setText("");
 		chkLinux.setSelected(false);
@@ -240,12 +245,14 @@ public class Sistema {
 				String compatLinux = chkLinux.isSelected() ? "S" : "N";
 				String compatMac = chkMacOS.isSelected() ? "S" : "N";
 				String outros = chkMacOS.isSelected() ? "S" : "N";
-				String erro = ctrl.cadastrarProduto(Integer.valueOf(0), Double.parseDouble(txtPreco.getText()),
+				Double preco = Double.parseDouble(txtPreco.getText());
+				String erro = ctrl.cadastrarProduto(Integer.valueOf(0), preco,
 						Integer.valueOf(txtQuantidade.getText()), compatWindows, compatLinux, compatMac, outros,
 						String.valueOf(txtProduto.getText()), String.valueOf(txtCadastroDescricao.getText()),
 						cbModelo.getSelectedItem().toString(), cbSlot.getSelectedItem().toString(),
 						cbCategoria.getSelectedItem().toString());
 				JOptionPane.showMessageDialog(null, erro);
+				limparTela();
 			}
 		});
 		btnSalvar.setBounds(95, 283, 89, 23);
@@ -326,6 +333,55 @@ public class Sistema {
 		txtVendasProduto.setColumns(10);
 
 		JButton btnVendasPesquisar = new JButton("Pesquisar");
+		btnVendasPesquisar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Controlador ctrl = new Controlador();
+				ArrayList<Produto> lstProdutos = new ArrayList<>();
+				//Caso informar o código busca o produto pelo código. Caso contrário busca apenas pelo nome.
+				if(txtVendasCodigo.getText() != null && !txtVendasCodigo.getText().equals("")){
+					int codigo = 0;
+					try{
+						codigo = Integer.parseInt(txtVendasCodigo.getText());
+						Produto p = ctrl.buscarProduto(codigo, txtVendasProduto.getText());
+						if(p == null){
+							JOptionPane.showMessageDialog(null, "Nenhum produto cadastrado com o codigo informado.");
+						}else{
+							lstProdutos.add(p);
+							preencheTelaVendas(lstProdutos);
+						}
+					}catch (Exception e) {
+						JOptionPane.showMessageDialog(null, "Erro ao buscar produto: " + e.getMessage());
+					}
+				}else{//busca apenas por descricao
+					lstProdutos = ctrl.buscarProdutosPorNome(txtVendasProduto.getText());
+					if(lstProdutos.size() > 0){
+						preencheTelaVendas(lstProdutos);
+					}else{
+						JOptionPane.showMessageDialog(null, "Nenhum produto cadastrado com o codigo informado.");
+					}
+				}
+			}
+			
+			private void preencheTelaVendas(ArrayList<Produto> lstProdutos) {
+				TableModelProduto tableModelProduto = new TableModelProduto();
+					for(Produto p : lstProdutos){
+						tableModelProduto.addProduto(p);
+					}
+					tabelaVendas.setModel(tableModelProduto);
+//					TableColumnModel tbl = new DefaultTableColumnModel();
+//					TableColumn tc = new TableColumn();
+//					tc.setHeaderValue("codigo");
+//					tc.setHeaderValue("Nome");
+//					tc.setHeaderValue("Descricao");
+//					tc.setHeaderValue("quantidade");
+//					tc.setHeaderValue("preco");
+//					tbl.addColumn(tc);
+//					tabelaVendas.setColumnModel(tbl);
+
+
+				
+			}
+		});
 		btnVendasPesquisar.setBounds(400, 20, 109, 23);
 		pnlProduto.add(btnVendasPesquisar);
 
